@@ -3,6 +3,7 @@ name: Terraform Destroy
 on:
   workflow_dispatch:
     inputs:
+
       branch:
         description: Branch Name
         required: true
@@ -22,21 +23,13 @@ on:
           - UAT
           - PROD
 
-      action:
-        description: Terraform Action
-        required: true
-        type: choice
-        options:
-          - plan
-          - apply
-          - destroy
-
 jobs:
-  terraform:
+
+  terraform-destroy:
+
     runs-on: ubuntu-latest
 
-    environment:
-      name: ${{ github.event.inputs.environment }}
+    environment: ${{ github.event.inputs.environment }}
 
     concurrency:
       group: terraform-${{ github.event.inputs.environment }}
@@ -53,6 +46,7 @@ jobs:
         working-directory: terraform/${{ github.event.inputs.environment }}
 
     steps:
+
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
@@ -78,22 +72,8 @@ jobs:
       - name: Terraform Validate
         run: terraform validate
 
-      - name: Terraform Plan
-        if: github.event.inputs.action == 'plan'
-        run: terraform plan -var-file="${{ github.event.inputs.environment }}.tfvars" -input=false
-
-      - name: Terraform Plan For Apply
-        if: github.event.inputs.action == 'apply'
-        run: terraform plan -var-file="${{ github.event.inputs.environment }}.tfvars" -input=false -out=tfplan
-
-      - name: Terraform Apply
-        if: github.event.inputs.action == 'apply'
-        run: terraform apply -input=false -auto-approve tfplan
-
       - name: Terraform Destroy Plan
-        if: github.event.inputs.action == 'destroy'
         run: terraform plan -destroy -var-file="${{ github.event.inputs.environment }}.tfvars" -input=false -out=destroy.tfplan
 
       - name: Terraform Destroy
-        if: github.event.inputs.action == 'destroy'
         run: terraform apply -input=false -auto-approve destroy.tfplan

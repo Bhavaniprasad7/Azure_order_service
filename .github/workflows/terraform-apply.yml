@@ -23,18 +23,9 @@ on:
           - UAT
           - PROD
 
-      action:
-        description: Terraform Action
-        required: true
-        type: choice
-        options:
-          - plan
-          - apply
-          - destroy
-
 jobs:
 
-  terraform-plan:
+  terraform-apply:
 
     runs-on: ubuntu-latest
 
@@ -82,17 +73,7 @@ jobs:
         run: terraform validate
 
       - name: Terraform Plan
-        if: github.event.inputs.action == 'plan'
-        run: terraform plan
-
-      - name: Terraform Plan for Apply
-        if: github.event.inputs.action == 'apply'
-        run: terraform plan -out=tfplan
+        run: terraform plan -var-file="${{ github.event.inputs.environment }}.tfvars" -input=false -out=tfplan
 
       - name: Terraform Apply
-        if: github.event.inputs.action == 'apply'
-        run: terraform apply -auto-approve tfplan
-
-      - name: Terraform Destroy
-        if: github.event.inputs.action == 'destroy'
-        run: terraform destroy -auto-approve
+        run: terraform apply -input=false -auto-approve tfplan

@@ -43,20 +43,16 @@ module "keyvault" {
   }
 }
 
-module "logic-app-consumption" {
+module "logic_app" {
 
-  source = "../modules/logic-app-standard"
+  source = "../modules/logic-app-consumption"
 
-  logic_app_name      = "la-ais-dev"
+  logic_app_name      = var.logic_app_name
   resource_group_name = var.resource_group_name
   location            = var.location
 
-  app_service_plan_id = module.app_service_plan.id
-
-  storage_account_name       = module.storage_account.storage_account_name
-  storage_account_access_key = module.storage_account.primary_access_key
-
   tags = {
     Environment = "DEV"
+    ManagedBy   = "Terraform"
   }
 }

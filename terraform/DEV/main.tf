@@ -43,7 +43,7 @@ module "keyvault" {
   }
 }
 
-module "logic_app_standard" {
+module "logic-app-consumption" {
 
   source = "../modules/logic-app-standard"
 

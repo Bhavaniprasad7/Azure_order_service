@@ -42,3 +42,34 @@ module "keyvault" {
     ManagedBy   = "Terraform"
   }
 }
+
+module "app_service_plan" {
+
+  source = "../modules/app-service-plan"
+
+  plan_name           = "asp-ais-dev"
+  resource_group_name = var.resource_group_name
+  location            = var.location
+
+  tags = {
+    Environment = "DEV"
+  }
+}
+
+module "logic_app_standard" {
+
+  source = "../modules/logic-app-standard"
+
+  logic_app_name      = "la-ais-dev"
+  resource_group_name = var.resource_group_name
+  location            = var.location
+
+  app_service_plan_id = module.app_service_plan.id
+
+  storage_account_name       = module.storage_account.storage_account_name
+  storage_account_access_key = module.storage_account.primary_access_key
+
+  tags = {
+    Environment = "DEV"
+  }
+}

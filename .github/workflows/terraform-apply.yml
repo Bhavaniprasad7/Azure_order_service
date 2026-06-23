@@ -1,0 +1,93 @@
+name: Terraform Apply
+
+on:
+  workflow_dispatch:
+    inputs:
+
+      branch:
+        description: Branch Name
+        required: true
+        default: main-dev
+        type: choice
+        options:
+          - main-dev
+          - main
+
+      environment:
+        description: Environment
+        required: true
+        default: DEV
+        type: choice
+        options:
+          - DEV
+          - UAT
+          - PROD
+
+      action:
+        description: Terraform Action
+        required: true
+        type: choice
+        options:
+          - plan
+          - apply
+
+jobs:
+
+  terraform:
+
+    runs-on: ubuntu-latest
+
+    environment: ${{ github.event.inputs.environment }}
+
+    concurrency:
+      group: terraform-${{ github.event.inputs.environment }}
+      cancel-in-progress: false
+
+    env:
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+
+    defaults:
+      run:
+        working-directory: terraform/${{ github.event.inputs.environment }}
+
+    steps:
+
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch }}
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: |
+            {
+              "clientId":"${{ secrets.ARM_CLIENT_ID }}",
+              "clientSecret":"${{ secrets.ARM_CLIENT_SECRET }}",
+              "subscriptionId":"${{ secrets.ARM_SUBSCRIPTION_ID }}",
+              "tenantId":"${{ secrets.ARM_TENANT_ID }}"
+            }
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        if: github.event.inputs.action == 'plan'
+        run: terraform plan -var-file="${{ github.event.inputs.environment }}.tfvars" -input=false -out=tfplan
+
+      - name: Terraform Plan for Apply
+        if: github.event.inputs.action == 'apply'
+        run: terraform plan -var-file="${{ github.event.inputs.environment }}.tfvars" -input=false -out=tfplan
+
+      - name: Terraform Apply
+        if: github.event.inputs.action == 'apply'
+        run: terraform apply -input=false -auto-approve tfplan

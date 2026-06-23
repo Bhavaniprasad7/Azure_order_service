@@ -1,0 +1,11 @@
+subscription_id    = "d8555f51-59a5-4c1e-81a7-43240def891d"
+tenant_id          = "ef61a404-756b-41f6-a457-2a5f6a808547"
+
+location           = "Central India"
+resource_group_name = "RG-AIS-DEV-ORP"
+keyvault_name = "kv-ais-dev-orp"
+storage_account_name = "saaisdevorp"
+account_replication_type = "LRS"
+account_tier = "Standard"
+container_name = "terraform-state-file"
+container_access_type = "private"

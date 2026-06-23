@@ -1,16 +1,22 @@
-name: Terraform Plan
+name: Terraform Deployment
 
 on:
   workflow_dispatch:
     inputs:
+
       branch:
-        description: 'Branch to deploy'
+        description: Branch Name
         required: true
-        default: 'main-dev'
+        default: main-dev
+        type: choice
+        options:
+          - main-dev
+          - main
 
       environment:
-        description: 'Environment'
+        description: Environment
         required: true
+        default: DEV
         type: choice
         options:
           - DEV
@@ -18,9 +24,12 @@ on:
           - PROD
 
 jobs:
+
   terraform-plan:
-    name: Terraform Plan
+
     runs-on: ubuntu-latest
+
+    environment: ${{ github.event.inputs.environment }}
 
     env:
       ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
@@ -28,24 +37,36 @@ jobs:
       ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
       ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
 
+    defaults:
+      run:
+        working-directory: terraform/${{ github.event.inputs.environment }}
+
     steps:
 
-      - name: Checkout Selected Branch
+      - name: Checkout Code
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.branch }}
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: |
+            {
+              "clientId":"${{ secrets.ARM_CLIENT_ID }}",
+              "clientSecret":"${{ secrets.ARM_CLIENT_SECRET }}",
+              "subscriptionId":"${{ secrets.ARM_SUBSCRIPTION_ID }}",
+              "tenantId":"${{ secrets.ARM_TENANT_ID }}"
+            }
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
       - name: Terraform Init
-        working-directory: terraform/${{ github.event.inputs.environment }}
         run: terraform init
 
       - name: Terraform Validate
-        working-directory: terraform/${{ github.event.inputs.environment }}
         run: terraform validate
 
       - name: Terraform Plan
-        working-directory: terraform/${{ github.event.inputs.environment }}
-        run: terraform plan
+        run: terraform plan -out=tfplan

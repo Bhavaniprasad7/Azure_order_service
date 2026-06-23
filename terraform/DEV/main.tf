@@ -43,19 +43,6 @@ module "keyvault" {
   }
 }
 
-module "app_service_plan" {
-
-  source = "../modules/app-service-plan"
-
-  plan_name           = "asp-ais-dev"
-  resource_group_name = var.resource_group_name
-  location            = var.location
-
-  tags = {
-    Environment = "DEV"
-  }
-}
-
 module "logic_app_standard" {
 
   source = "../modules/logic-app-standard"

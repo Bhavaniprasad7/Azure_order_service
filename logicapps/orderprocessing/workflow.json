@@ -2,12 +2,8 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "workflows_laaisdev_name": {
-            "parameters": {
-                "workflowName": {
-                    "type": "String"
-                }
-            }
+        "workflowName": {
+            "type": "String"
         }
     },
     "variables": {},
@@ -15,7 +11,7 @@
         {
             "type": "Microsoft.Logic/workflows",
             "apiVersion": "2017-07-01",
-            "name": "[parameters('workflows_laaisdev_name')]",
+            "name": "[parameters('workflowName')]",
             "location": "centralindia",
             "properties": {
                 "state": "Enabled",

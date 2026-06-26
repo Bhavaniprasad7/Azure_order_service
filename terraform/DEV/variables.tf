@@ -34,3 +34,9 @@ variable "container_access_type" {
   type = string
 }
 variable "logic_app_name" {}
+
+variable "service_plan_name" {
+  type = string
+}
+
+variable "function_app_name" {}

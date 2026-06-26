@@ -1,5 +1,5 @@
 module "rg" {
-  source   = "../modules/resource-group"
+  source = "../modules/resource-group"
 
   rg_name  = var.resource_group_name
   location = var.location
@@ -18,7 +18,8 @@ module "storage_account" {
 
   container_name        = var.container_name
   container_access_type = var.container_access_type
-   depends_on = [
+
+  depends_on = [
     module.rg
   ]
 
@@ -32,14 +33,14 @@ module "storage_account" {
 module "keyvault" {
   source = "../modules/keyvault"
 
-  keyvault_name      = var.keyvault_name
-  location           = var.location
+  keyvault_name       = var.keyvault_name
+  location            = var.location
   resource_group_name = var.resource_group_name
-  tenant_id          = var.tenant_id
+  tenant_id           = var.tenant_id
 
   sku_name = "standard"
 
-   depends_on = [
+  depends_on = [
     module.rg
   ]
 
@@ -51,14 +52,13 @@ module "keyvault" {
 }
 
 module "logic_app" {
-
   source = "../modules/logic-app-consumption"
 
   logic_app_name      = var.logic_app_name
   resource_group_name = var.resource_group_name
   location            = var.location
 
-   depends_on = [
+  depends_on = [
     module.rg
   ]
 
@@ -66,4 +66,36 @@ module "logic_app" {
     Environment = "DEV"
     ManagedBy   = "Terraform"
   }
+}
+
+module "app_service_plan" {
+  source = "../modules/app-service-plan"
+
+  service_plan_name = var.service_plan_name
+
+  resource_group_name = var.resource_group_name
+  location            = var.location
+
+  depends_on = [
+    module.rg
+  ]
+}
+
+module "function_app" {
+  source = "../modules/function-app"
+
+  function_app_name = var.function_app_name
+
+  resource_group_name = var.resource_group_name
+  location            = var.location
+
+  service_plan_id = module.app_service_plan.id
+
+  storage_account_name       = module.storage_account.name
+  storage_account_access_key = module.storage_account.primary_access_key
+
+  depends_on = [
+    module.app_service_plan,
+    module.storage_account
+  ]
 }

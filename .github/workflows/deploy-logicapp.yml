@@ -72,6 +72,6 @@ jobs:
         run: |
 
           az deployment group create \
-            --resource-group rg-order-${{ github.event.inputs.environment }} \
+            --resource-group RG-AIS-DEV-ORP \
             --template-file logicapps/${{ github.event.inputs.logicapp }}/workflow.json \
             --parameters logicapps/${{ github.event.inputs.logicapp }}/parameters/${{ github.event.inputs.environment }}.parameters.json

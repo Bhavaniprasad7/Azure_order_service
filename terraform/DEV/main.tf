@@ -18,6 +18,9 @@ module "storage_account" {
 
   container_name        = var.container_name
   container_access_type = var.container_access_type
+   depends_on = [
+    module.rg
+  ]
 
   tags = {
     Environment = "DEV"
@@ -36,6 +39,10 @@ module "keyvault" {
 
   sku_name = "standard"
 
+   depends_on = [
+    module.rg
+  ]
+
   tags = {
     Environment = "DEV"
     Application = "AIS"
@@ -50,6 +57,10 @@ module "logic_app" {
   logic_app_name      = var.logic_app_name
   resource_group_name = var.resource_group_name
   location            = var.location
+
+   depends_on = [
+    module.rg
+  ]
 
   tags = {
     Environment = "DEV"
